@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import Book from "../models/book.model";
 
 
-export const createBook = async (req: Request, res: Response) => {
+export const createBook = async (req: Request, res: Response): Promise<void>=> {
   try {
     const book = await Book.create(req.body);
 
@@ -35,7 +35,7 @@ export const createBook = async (req: Request, res: Response) => {
 
 
 
-export const getAllBooks = async (req: Request, res: Response) => {
+export const getAllBooks = async (req: Request, res: Response):Promise<void> => {
   try {
     const {
       filter,              
@@ -77,15 +77,16 @@ export const getAllBooks = async (req: Request, res: Response) => {
 
 
 
-export const getBookById = async (req: Request, res: Response) => {
+export const getBookById = async (req: Request, res: Response):Promise<void> => {
   try {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return res.status(404).json({
+       res.status(404).json({
         success: false,
         message: "Book not found",
       });
+      return
     }
 
     res.status(200).json({
@@ -105,22 +106,23 @@ export const getBookById = async (req: Request, res: Response) => {
 
 
 
-export const updateBook = async (req: Request, res: Response) => {
+export const updateBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const book = await Book.findByIdAndUpdate(
-  { _id: req.params.id },
-  { $set: { ...req.body } },
-   {
+      req.params.id,
+      { $set: { ...req.body } },
+      {
         new: true,           
         runValidators: true, 
       }
-);;
+    );
 
     if (!book) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Book not found",
       });
+      return;
     }
 
     res.status(200).json({
@@ -137,15 +139,16 @@ export const updateBook = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteBook = async (req: Request, res: Response) => {
+export const deleteBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
 
     if (!book) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Book not found",
       });
+      return;
     }
 
     res.status(200).json({

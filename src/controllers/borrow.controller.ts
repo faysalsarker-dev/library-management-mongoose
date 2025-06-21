@@ -6,20 +6,22 @@ import { Request, Response } from "express";
 
 
 
-export const borrowBook = async (req: Request, res: Response) => {
+export const borrowBook = async (req: Request, res: Response):Promise<void> => {
   try {
     const { book: bookId, quantity, dueDate } = req.body;
 
     const book = await Book.findById(bookId);
     if (!book) {
-      return res.status(404).json({ success: false, message: "Book not found" });
+     res.status(404).json({ success: false, message: "Book not found" });
+      return 
     }
 
     if (book.copies < quantity) {
-      return res.status(400).json({
+       res.status(400).json({
         success: false,
         message: `Only ${book.copies} copies available`,
       });
+      return
     }
 
     book.copies -= quantity;
@@ -44,7 +46,7 @@ export const borrowBook = async (req: Request, res: Response) => {
 
 
 
-export const getBorrowedBooksSummary = async (req: Request, res: Response) => {
+export const getBorrowedBooksSummary = async (req: Request, res: Response):Promise<void> => {
   try {
     const summary = await Borrow.aggregate([
       {

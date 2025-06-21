@@ -69,10 +69,11 @@ const getBookById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         const book = yield book_model_1.default.findById(req.params.id);
         if (!book) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: "Book not found",
             });
+            return;
         }
         res.status(200).json({
             success: true,
@@ -91,16 +92,16 @@ const getBookById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getBookById = getBookById;
 const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const book = yield book_model_1.default.findByIdAndUpdate({ _id: req.params.id }, { $set: Object.assign({}, req.body) }, {
+        const book = yield book_model_1.default.findByIdAndUpdate(req.params.id, { $set: Object.assign({}, req.body) }, {
             new: true,
             runValidators: true,
         });
-        ;
         if (!book) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: "Book not found",
             });
+            return;
         }
         res.status(200).json({
             success: true,
@@ -121,10 +122,11 @@ const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const book = yield book_model_1.default.findByIdAndDelete(req.params.id);
         if (!book) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: "Book not found",
             });
+            return;
         }
         res.status(200).json({
             success: true,

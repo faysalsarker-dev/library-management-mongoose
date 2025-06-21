@@ -51,5 +51,8 @@ const bookSchema = new mongoose_1.Schema({
 }, {
     timestamps: true,
 });
+bookSchema.methods.handleCopies = function () {
+    this.available = this.copies > 0;
+};
 const Book = (0, mongoose_1.model)("Book", bookSchema);
 exports.default = Book;

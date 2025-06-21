@@ -83,3 +83,39 @@ This system allows managing books and borrowings with:
 
 
 
+## Local Setup Instructions
+
+1. **Clone the repository:**
+  ```bash
+  git clone <repository-url>
+  cd assignment-3
+  ```
+
+2. **Install dependencies:**
+  ```bash
+  npm install
+  ```
+
+3. **Configure environment variables:**
+  - Copy `.env.example` to `.env` and update values as needed (e.g., MongoDB URI).
+
+4. **Run MongoDB:**
+  - Ensure MongoDB is running locally or update the URI for a remote instance.
+
+5. **Start the development server:**
+  ```bash
+  npm run dev
+  ```
+  - For production build:
+    ```bash
+    npm run build
+    npm start
+    ```
+
+6. **API is available at:**  
+  `http://localhost:3000/api`
+
+7. **Run tests (if available):**
+  ```bash
+  npm test
+  ```
