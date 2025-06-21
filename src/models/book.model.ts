@@ -55,5 +55,12 @@ const bookSchema: Schema<IBook> = new Schema(
   }
 );
 
+
+bookSchema.methods.handleCopies = function () {
+  this.available = this.copies > 0;
+};
+
+
+
 const Book = model<IBook>("Book", bookSchema);
 export default Book;
