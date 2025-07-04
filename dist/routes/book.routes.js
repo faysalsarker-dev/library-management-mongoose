@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const book_controller_1 = require("../controllers/book.controller");
 const router = express_1.default.Router();
 router.get('/', book_controller_1.getAllBooks);
+router.get('/group', book_controller_1.groupBooksByGenre);
 router.get('/:id', book_controller_1.getBookById);
 router.post('/', book_controller_1.createBook);
 router.put('/:id', book_controller_1.updateBook);

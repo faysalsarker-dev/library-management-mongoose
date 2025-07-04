@@ -1,9 +1,10 @@
-
 import { Request, Response } from "express";
 import Book from "../models/book.model";
 
-
-export const createBook = async (req: Request, res: Response): Promise<void>=> {
+export const createBook = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const book = await Book.create(req.body);
 
@@ -13,7 +14,6 @@ export const createBook = async (req: Request, res: Response): Promise<void>=> {
       data: book,
     });
   } catch (error: any) {
- 
     const errors: Record<string, string> = {};
 
     if (error.name === "ValidationError") {
@@ -30,39 +30,53 @@ export const createBook = async (req: Request, res: Response): Promise<void>=> {
   }
 };
 
-
-
-
-
-
-export const getAllBooks = async (req: Request, res: Response):Promise<void> => {
+export const getAllBooks = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const {
-      filter,              
-      sort = "desc",       
-      sortBy = "createdAt", 
-      limit = "10",        
+      filter,
+      sort = "desc",
+      sortBy = "createdAt",
+
+      limit = "10",
+      page = "1",
     } = req.query as Record<string, string>;
 
     const query: any = {};
 
-    
     if (filter) {
-      query.genre = filter.toUpperCase(); 
+      const searchRegex = new RegExp(filter, "i");
+      query.$or = [
+        { title: searchRegex },
+        { author: searchRegex },
+        { isbn: searchRegex },
+        { genre: searchRegex },
+      ];
     }
 
     const sortOrder = sort.toLowerCase() === "asc" ? 1 : -1;
     const sortQuery: any = { [sortBy]: sortOrder };
 
-   
+    const limitNumber = Number(limit);
+    const pageNumber = Number(page);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const total = await Book.countDocuments(query);
+
     const books = await Book.find(query)
       .sort(sortQuery)
-      .limit(Number(limit));
+      .skip(skip)
+      .limit(limitNumber);
 
     res.status(200).json({
       success: true,
       message: "Books retrieved successfully",
       data: books,
+      totalItems: total,
+      totalPages: Math.ceil(total / limitNumber),
+      currentPage: pageNumber,
     });
   } catch (error: any) {
     res.status(400).json({
@@ -73,20 +87,19 @@ export const getAllBooks = async (req: Request, res: Response):Promise<void> => 
   }
 };
 
-
-
-
-
-export const getBookById = async (req: Request, res: Response):Promise<void> => {
+export const getBookById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-       res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Book not found",
       });
-      return
+      return;
     }
 
     res.status(200).json({
@@ -103,17 +116,17 @@ export const getBookById = async (req: Request, res: Response):Promise<void> => 
   }
 };
 
-
-
-
-export const updateBook = async (req: Request, res: Response): Promise<void> => {
+export const updateBook = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const book = await Book.findByIdAndUpdate(
       req.params.id,
       { $set: { ...req.body } },
       {
-        new: true,           
-        runValidators: true, 
+        new: true,
+        runValidators: true,
       }
     );
 
@@ -139,7 +152,10 @@ export const updateBook = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteBook = async (req: Request, res: Response): Promise<void> => {
+export const deleteBook = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
 
@@ -165,7 +181,37 @@ export const deleteBook = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
+export const groupBooksByGenre = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const groupedBooks = await Book.aggregate([
+      {
+        $group: {
+          _id: "$genre",
+          totalCopies: { $sum: "$copies" },
+        },
+      },
+      {
+        $project: {
+          genre: "$_id",
+          totalCopies: 1,
+          _id: 0,
+        },
+      },
+    ]);
 
-
-
-
+    res.status(200).json({
+      success: true,
+      message: "Books grouped by genre with total copies",
+      data: groupedBooks,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: "Failed to group books by genre",
+      error: error.message || error,
+    });
+  }
+};

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBook = exports.updateBook = exports.getBookById = exports.getAllBooks = exports.createBook = void 0;
+exports.groupBooksByGenre = exports.deleteBook = exports.updateBook = exports.getBookById = exports.getAllBooks = exports.createBook = void 0;
 const book_model_1 = __importDefault(require("../models/book.model"));
 const createBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -43,7 +43,13 @@ const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const { filter, sort = "desc", sortBy = "createdAt", limit = "10", } = req.query;
         const query = {};
         if (filter) {
-            query.genre = filter.toUpperCase();
+            const searchRegex = new RegExp(filter, "i");
+            query.$or = [
+                { title: searchRegex },
+                { author: searchRegex },
+                { isbn: searchRegex },
+                { genre: searchRegex },
+            ];
         }
         const sortOrder = sort.toLowerCase() === "asc" ? 1 : -1;
         const sortQuery = { [sortBy]: sortOrder };
@@ -143,3 +149,35 @@ const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteBook = deleteBook;
+const groupBooksByGenre = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const groupedBooks = yield book_model_1.default.aggregate([
+            {
+                $group: {
+                    _id: "$genre",
+                    totalCopies: { $sum: "$copies" },
+                },
+            },
+            {
+                $project: {
+                    genre: "$_id",
+                    totalCopies: 1,
+                    _id: 0,
+                },
+            },
+        ]);
+        res.status(200).json({
+            success: true,
+            message: "Books grouped by genre with total copies",
+            data: groupedBooks,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Failed to group books by genre",
+            error: error.message || error,
+        });
+    }
+});
+exports.groupBooksByGenre = groupBooksByGenre;

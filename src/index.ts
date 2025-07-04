@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import connectDB from "./config/db";
 import errorHandler from "./middleware/errorHandler";
 import bookRoutes from "./routes/book.routes"
@@ -13,7 +14,9 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(errorHandler);
 
-
+app.use(cors({
+  origin: "http://localhost:5173",
+}));
 
 
 
