@@ -17,7 +17,7 @@ const port = process.env.PORT || 5000;
 app.use(express_1.default.json());
 app.use(errorHandler_1.default);
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://assignment-4-ecru-seven.vercel.app"]
 }));
 app.use('/api/books', book_routes_1.default);
 app.use('/api/borrow', borrow_routes_1.default);

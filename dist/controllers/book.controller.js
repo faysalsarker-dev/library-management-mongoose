@@ -40,7 +40,7 @@ const createBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.createBook = createBook;
 const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filter, sort = "desc", sortBy = "createdAt", limit = "10", } = req.query;
+        const { filter, sort = "desc", sortBy = "createdAt", limit = "10", page = "1", } = req.query;
         const query = {};
         if (filter) {
             const searchRegex = new RegExp(filter, "i");
@@ -53,13 +53,21 @@ const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         const sortOrder = sort.toLowerCase() === "asc" ? 1 : -1;
         const sortQuery = { [sortBy]: sortOrder };
+        const limitNumber = Number(limit);
+        const pageNumber = Number(page);
+        const skip = (pageNumber - 1) * limitNumber;
+        const total = yield book_model_1.default.countDocuments(query);
         const books = yield book_model_1.default.find(query)
             .sort(sortQuery)
-            .limit(Number(limit));
+            .skip(skip)
+            .limit(limitNumber);
         res.status(200).json({
             success: true,
             message: "Books retrieved successfully",
             data: books,
+            totalItems: total,
+            totalPages: Math.ceil(total / limitNumber),
+            currentPage: pageNumber,
         });
     }
     catch (error) {

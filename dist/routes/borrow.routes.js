@@ -8,4 +8,5 @@ const borrow_controller_1 = require("../controllers/borrow.controller");
 const router = express_1.default.Router();
 router.post('/', borrow_controller_1.borrowBook);
 router.get('/', borrow_controller_1.getBorrowedBooksSummary);
+router.get('/top', borrow_controller_1.getTopBorrowedBooks);
 exports.default = router;
